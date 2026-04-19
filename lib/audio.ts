@@ -1,20 +1,31 @@
 import { Audio } from 'expo-av';
 
 export type SoundId =
-  | 'ding'
+  | 'questIssue'
   | 'tapBlip'
-  | 'completion'
-  | 'levelUp'
-  | 'penalty';
+  | 'tapBlip10'
+  | 'typeBeep'
+  | 'completeChime'
+  | 'levelUpSwell'
+  | 'rankUpFanfare'
+  | 'penaltyAlarm'
+  | 'penaltyAmbience'
+  | 'transmission'
+  | 'errorDeny';
 
 const SOURCES: Record<SoundId, number | null> = {
-  // Wired in via require(...) — drop matching filenames into assets/sounds/
-  // and uncomment. See README for free sources.
-  ding: null,
+  // Drop matching files into assets/sounds/ and uncomment.
+  questIssue: null,
   tapBlip: null,
-  completion: null,
-  levelUp: null,
-  penalty: null,
+  tapBlip10: null,
+  typeBeep: null,
+  completeChime: null,
+  levelUpSwell: null,
+  rankUpFanfare: null,
+  penaltyAlarm: null,
+  penaltyAmbience: null,
+  transmission: null,
+  errorDeny: null,
 };
 
 // Lazy-loaded sound objects. We keep one instance per id and replay it.

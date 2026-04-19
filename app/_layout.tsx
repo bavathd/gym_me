@@ -3,9 +3,15 @@ import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import {
-  Orbitron_400Regular,
   Orbitron_700Bold,
+  Orbitron_900Black,
 } from '@expo-google-fonts/orbitron';
+import {
+  Rajdhani_400Regular,
+  Rajdhani_500Medium,
+  Rajdhani_600SemiBold,
+  Rajdhani_700Bold,
+} from '@expo-google-fonts/rajdhani';
 import { ShareTechMono_400Regular } from '@expo-google-fonts/share-tech-mono';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -20,8 +26,12 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Orbitron_400Regular,
     Orbitron_700Bold,
+    Orbitron_900Black,
+    Rajdhani_400Regular,
+    Rajdhani_500Medium,
+    Rajdhani_600SemiBold,
+    Rajdhani_700Bold,
     ShareTechMono_400Regular,
   });
 
@@ -57,11 +67,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
+        <StatusBar style="light" hidden />
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: '#0A1628' },
+            contentStyle: { backgroundColor: '#050B14' },
             animation: 'fade',
           }}
         />

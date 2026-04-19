@@ -17,7 +17,9 @@
     "expo-status-bar": "~1.12.1",
     "expo-splash-screen": "~0.27.5",
     "expo-font": "~12.0.10",
+    "expo-linear-gradient": "~13.0.2",
     "@expo-google-fonts/orbitron": "^0.2.3",
+    "@expo-google-fonts/rajdhani": "^0.2.3",
     "@expo-google-fonts/share-tech-mono": "^0.2.3",
     "expo-haptics": "~13.0.1",
     "expo-notifications": "~0.28.16",
@@ -30,7 +32,7 @@
     "react-native-screens": "3.31.1",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-reanimated": "~3.10.1",
-    "@shopify/react-native-skia": "1.2.3",
+    "react-native-svg": "15.2.0",
     "react-native-mmkv": "2.12.2",
     "zustand": "4.5.5"
   },

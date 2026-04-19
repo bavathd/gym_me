@@ -2,11 +2,13 @@ import React from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import Screen from '../../components/ui/Screen';
-import SystemPanel from '../../components/system/SystemPanel';
+import Panel from '../../components/system/Panel';
 import SystemText from '../../components/system/SystemText';
-import SystemButton from '../../components/ui/SystemButton';
+import SystemButton from '../../components/system/Button';
+import ScreenTitle from '../../components/system/ScreenTitle';
 import { useAppStore } from '../../lib/store';
-import { spacing } from '../../theme/tokens';
+import { DAILY_TARGETS } from '../../lib/quest';
+import { colors, spacing } from '../../theme/tokens';
 
 export default function AcceptScreen() {
   const setOnboarded = useAppStore((s) => s.setOnboarded);
@@ -16,34 +18,65 @@ export default function AcceptScreen() {
     router.replace('/');
   };
 
+  const kv: Array<[string, string]> = [
+    ['PUSH-UPS', `${DAILY_TARGETS.pushups}`],
+    ['SIT-UPS', `${DAILY_TARGETS.situps}`],
+    ['SQUATS', `${DAILY_TARGETS.squats}`],
+    ['RUN', `${DAILY_TARGETS.run} KM`],
+    ['RESETS', '00:00 LOCAL'],
+    ['ON FAIL', 'PENALTY'],
+  ];
+
   return (
-    <Screen>
-      <View style={{ flex: 1, justifyContent: 'center', gap: spacing.lg }}>
-        <SystemText variant="display" tone="amber" size="xxl">
-          NOTICE
+    <Screen hideSysHeader scroll>
+      <ScreenTitle over="― DAILY QUEST · CONTRACT ―" title="ACCEPT TERMS" />
+
+      <Panel title="QUEST · DAILY" tone="cyan">
+        <View style={{ gap: spacing[3] }}>
+          {kv.map(([k, v]) => (
+            <View
+              key={k}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingVertical: spacing[2],
+                borderBottomWidth: 1,
+                borderBottomColor: colors.stroke.cyanFaint,
+              }}
+            >
+              <SystemText
+                variant="heading"
+                weight="semibold"
+                size="xs"
+                tracking="widest"
+                tone="secondary"
+                uppercase
+              >
+                {k}
+              </SystemText>
+              <SystemText variant="mono" size="sm" tone="cyan200" glow="sm">
+                {`[ ${v} ]`}
+              </SystemText>
+            </View>
+          ))}
+        </View>
+      </Panel>
+
+      <View style={{ height: spacing[5] }} />
+      <Panel tone="cyan" pad={4}>
+        <SystemText variant="mono" size="2xs" tone="secondary">
+          {'> THE QUEST DOES NOT SCALE. NO SHORTCUTS. COMPLETION GRANTS STAT GAINS AND EXP. FAILURE ISSUES A PENALTY QUEST AT NEXT DAWN.'}
         </SystemText>
-        <SystemPanel variant="amber">
-          <SystemText variant="mono" tone="white" size="md">
-            {[
-              'Daily Quest (resets 00:00 local):',
-              '  · 100 push-ups',
-              '  · 100 sit-ups',
-              '  · 100 squats',
-              '  · 10 km run',
-              '',
-              'Completion grants stat gains and EXP.',
-              'Failure triggers a Penalty Quest the next day.',
-              'The quest does not scale. No shortcuts.',
-            ].join('\n')}
-          </SystemText>
-        </SystemPanel>
-        <SystemButton label="Accept" onPress={accept} size="lg" />
-        <SystemButton
-          label="Decline"
-          tone="red"
-          size="sm"
-          onPress={() => router.back()}
-        />
+      </Panel>
+
+      <View style={{ height: spacing[6] }} />
+      <View style={{ gap: spacing[4] }}>
+        <SystemButton size="lg" onPress={accept}>
+          ACCEPT
+        </SystemButton>
+        <SystemButton size="sm" ghost tone="danger" onPress={() => router.back()}>
+          DECLINE
+        </SystemButton>
       </View>
     </Screen>
   );

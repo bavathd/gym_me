@@ -1,14 +1,5 @@
 import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
-import {
-  Canvas,
-  Circle,
-  Group,
-  Blur,
-  RadialGradient,
-  vec,
-  Rect,
-} from '@shopify/react-native-skia';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -17,98 +8,203 @@ import Animated, {
   withTiming,
   withSequence,
   withDelay,
+  Easing,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import SystemText from './SystemText';
-import { colors, spacing, timing } from '../../theme/tokens';
+import SystemButton from './Button';
+import { colors, motion, spacing } from '../../theme/tokens';
 import { play } from '../../lib/audio';
+
+const { width: W, height: H } = Dimensions.get('window');
+
+export type LevelUpStat = { key: string; delta: string };
 
 export type LevelUpSequenceProps = {
   visible: boolean;
-  level: number;
-  rank?: string;
-  onDone?: () => void;
+  fromLevel: number;
+  toLevel: number;
+  stats?: LevelUpStat[];
+  onDismiss: () => void;
 };
-
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 export const LevelUpSequence: React.FC<LevelUpSequenceProps> = ({
   visible,
-  level,
-  rank,
-  onDone,
+  fromLevel,
+  toLevel,
+  stats = [],
+  onDismiss,
 }) => {
-  const scale = useSharedValue(0.6);
-  const opacity = useSharedValue(0);
+  const [step, setStep] = React.useState(0);
+  const burstOpacity = useSharedValue(0);
+  const burstScale = useSharedValue(0.7);
+  const burstBlur = useSharedValue(20);
 
   React.useEffect(() => {
     if (!visible) return;
-    play('levelUp');
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
-      () => {},
-    );
-    opacity.value = withTiming(1, { duration: timing.base });
-    scale.value = withSequence(
-      withTiming(1.1, { duration: timing.slow }),
-      withTiming(1, { duration: timing.base }),
-    );
-    const t = setTimeout(() => onDone?.(), timing.dramatic + 1200);
-    return () => clearTimeout(t);
-  }, [visible, onDone, opacity, scale]);
+    setStep(0);
+    play('levelUpSwell');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
 
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ scale: scale.value }],
+    burstOpacity.value = withTiming(1, { duration: motion.duration.md });
+    burstScale.value = withSequence(
+      withTiming(1.04, {
+        duration: motion.duration.md,
+        easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+      }),
+      withTiming(1, { duration: motion.duration.sm }),
+    );
+    burstBlur.value = withTiming(0, { duration: motion.duration.md });
+
+    const t1 = setTimeout(() => setStep(1), 500);
+    const t2 = setTimeout(() => setStep(2), 1400);
+    const t3 = setTimeout(() => setStep(3), 2400);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [visible, burstBlur, burstOpacity, burstScale]);
+
+  const burstStyle = useAnimatedStyle(() => ({
+    opacity: burstOpacity.value,
+    transform: [{ scale: burstScale.value }],
   }));
 
   if (!visible) return null;
 
   return (
     <Animated.View
-      entering={FadeIn.duration(160)}
-      exiting={FadeOut.duration(200)}
+      entering={FadeIn.duration(motion.duration.md)}
+      exiting={FadeOut.duration(motion.duration.sm)}
       style={styles.root}
-      pointerEvents="none"
     >
-      <Canvas style={StyleSheet.absoluteFill}>
-        <Rect x={0} y={0} width={SCREEN_W} height={SCREEN_H} color="#050B14" />
-        <Group>
-          <Circle
-            cx={SCREEN_W / 2}
-            cy={SCREEN_H / 2}
-            r={Math.max(SCREEN_W, SCREEN_H) * 0.6}
-          >
-            <RadialGradient
-              c={vec(SCREEN_W / 2, SCREEN_H / 2)}
-              r={Math.max(SCREEN_W, SCREEN_H) * 0.6}
-              colors={['#00D4FF', '#0A1628', '#050B14']}
-            />
-          </Circle>
-          <Blur blur={30} />
-        </Group>
-      </Canvas>
+      <LinearGradient
+        colors={['rgba(0,212,255,0.35)', 'rgba(5,11,20,0.96)', '#000000']}
+        locations={[0, 0.55, 1]}
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0.5, y: 0.3 }}
+        end={{ x: 0.5, y: 1 }}
+      />
 
-      <Animated.View style={[styles.content, textStyle]}>
-        <SystemText variant="display" tone="cyan" size="display">
+      <Animated.View style={[styles.burst, burstStyle]}>
+        <SystemText
+          variant="display"
+          weight="black"
+          size="5xl"
+          tracking="widest"
+          tone="cyan100"
+          glow="lg"
+          style={{ textAlign: 'center' }}
+        >
           LEVEL UP
         </SystemText>
-        <View style={{ height: spacing.md }} />
-        <SystemText variant="mono" tone="white" size="xl">
-          {`Level ${level}${rank ? ` · Rank ${rank}` : ''}`}
-        </SystemText>
-        <View style={{ height: spacing.sm }} />
-        <SystemText
-          variant="mono"
-          tone="mute"
-          size="md"
-          typewriter
-          haptic
-          sound
-          speedMs={28}
-        >
-          {'You have grown stronger. Continue the quest.'}
-        </SystemText>
       </Animated.View>
+
+      {step >= 1 && (
+        <Animated.View entering={FadeIn} style={styles.levelRow}>
+          <SystemText
+            variant="heading"
+            weight="bold"
+            size="sm"
+            tracking="widest"
+            tone="cyan300"
+          >
+            {`${String(fromLevel).padStart(2, '0')}  →  `}
+          </SystemText>
+          <SystemText
+            variant="heading"
+            weight="bold"
+            size="sm"
+            tracking="widest"
+            tone="cyan100"
+            glow="md"
+          >
+            {String(toLevel).padStart(2, '0')}
+          </SystemText>
+        </Animated.View>
+      )}
+
+      {step >= 2 && (
+        <Animated.View entering={FadeIn} style={styles.statsBox}>
+          <SystemText
+            variant="heading"
+            weight="semibold"
+            size="2xs"
+            tracking="widest"
+            tone="secondary"
+            glow="none"
+            uppercase
+            style={{ textAlign: 'center' }}
+          >
+            ― ATTRIBUTES AWARDED ―
+          </SystemText>
+          <View style={{ height: spacing[4] }} />
+          {stats.map((s, i) => (
+            <StatRow key={s.key} statKey={s.key} delta={s.delta} index={i} />
+          ))}
+        </Animated.View>
+      )}
+
+      {step >= 3 && (
+        <Animated.View entering={FadeIn} style={styles.continue}>
+          <SystemButton onPress={onDismiss} size="lg">
+            CONTINUE
+          </SystemButton>
+        </Animated.View>
+      )}
+    </Animated.View>
+  );
+};
+
+const StatRow: React.FC<{ statKey: string; delta: string; index: number }> = ({
+  statKey,
+  delta,
+  index,
+}) => {
+  const opacity = useSharedValue(0);
+  const translate = useSharedValue(-8);
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      index * 120,
+      withTiming(1, {
+        duration: motion.duration.md,
+        easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+      }),
+    );
+    translate.value = withDelay(
+      index * 120,
+      withTiming(0, { duration: motion.duration.md }),
+    );
+    if (index === 0) Haptics.selectionAsync().catch(() => {});
+  }, [index, opacity, translate]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translate.value }],
+  }));
+
+  const zero = delta === '+0' || delta === '0';
+
+  return (
+    <Animated.View style={[styles.statRow, animStyle]}>
+      <SystemText
+        variant="mono"
+        size="md"
+        tone="cyan300"
+        tracking="wider"
+      >
+        {statKey}
+      </SystemText>
+      <SystemText
+        variant="mono"
+        size="md"
+        tone={zero ? 'muted' : 'cyan200'}
+        glow={zero ? 'none' : 'sm'}
+      >
+        {`▲ ${delta}`}
+      </SystemText>
     </Animated.View>
   );
 };
@@ -116,13 +212,35 @@ export const LevelUpSequence: React.FC<LevelUpSequenceProps> = ({
 const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.navyDeep,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
+    padding: spacing[9],
+    backgroundColor: '#000',
   },
-  content: {
+  burst: {
     alignItems: 'center',
+  },
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing[3],
+  },
+  statsBox: {
+    marginTop: spacing[9],
+    width: '100%',
+    maxWidth: 280,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.stroke.cyanFaint,
+  },
+  continue: {
+    marginTop: spacing[8],
   },
 });
 
