@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Solo Leveling Gym",
+    "slug": "solo-leveling-gym",
+    "version": "0.1.0",
+    "scheme": "sololevelinggym",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A1628"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sololevelinggym.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Used only to measure run distance during an active training session.",
+        "UIBackgroundModes": []
+      }
+    },
+    "android": {
+      "package": "com.sololevelinggym.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0A1628"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Used only to measure run distance during an active training session."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#00D4FF"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
